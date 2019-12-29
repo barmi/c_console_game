@@ -7,47 +7,109 @@
 #define putsxy(x, y, s) {gotoxy(x, y);puts(s);}
 #define KEY_ESC 27
 
-int main()
+int stage_level = 0;
+// 고정된 스테이지
+char stage[5][20][40] = {
 {
-	// 고정된 스테이지
-	char stage[20][40] = { 
-		"####", 
-		"#  #",
-		"#  #",
-		"#  ###",
-		"#.$$@#",
-		"#  . #",
-		"#  ###", 
-		"####" };
-	// 가변 스테이지
-	char back_stage[20][40];
+	// 레벨 1
+	"####",
+	"#  #",
+	"#  #",
+	"#  ###",
+	"#.$$@#",
+	"#  . #",
+	"#  ###",
+	"####"
+},
+{
+	// 레벨 2
+	" #####",
+	" #   #",
+	"##.# #",
+	"#  @ #",
+	"#  $ #",
+	"# # ##",
+	"#   #",
+	"#####"
+},
+{
+	"   ####",
+	"####  #",
+	"#  #  #",
+	"# . . #",
+	"# @$$ #",
+	"# # ###",
+	"#   #",
+	"#####"
+},
+{
+	" #####",
+	"## @ ####",
+	"#  #  . ##",
+	"# #      #",
+	"# $$ #.  #",
+	"##    ####",
+	" ##   #",
+	"  #####"
+},
+{
+	"######",
+	"#    #",
+	"# $$ ###",
+	"### @  #",
+	"  #  . #",
+	"  ## .##",
+	"   ####"
+},
+};
+// 가변 스테이지
+char back_stage[20][40];
+int x, y;
+int moving_count;
 
-	int x, y;
-	int dx, dy;
-	int is_win;
-	int moving_count = 0;
-
+void init_stage()
+{
+	clrscr();
 	// 스테이지 출력( 기본값 )
 	for (int i = 0; i < 20; i++)
 	{
-		printf("%s\n", stage[i]);
+		printf("%s\n", stage[stage_level][i]);
 	}
 
-	putsxy(45, 2, "STAGE");
+	char buff[10];
+	sprintf_s(buff, sizeof(buff), "%d", stage_level + 1);
+
+	putsxy(45, 2, "S T A G E ");
+	putsxy(55, 2, buff);
+	putsxy(45, 4, "다시 하기 : r \n끝내기 : x");
+	putsxy(45, 5, "");
+	putsxy(45, 6, "움직이기 : 방향키");
 
 	// 주인공 찾기
 	for (int i = 0; i < 20; i++)
 	{
 		for (int j = 0; j < 40; j++)
 		{
-			if (stage[i][j] == '@')
+			if (stage[stage_level][i][j] == '@')
 			{
 				x = j;
 				y = i;
 			}
-			back_stage[i][j] = stage[i][j];
+			back_stage[i][j] = stage[stage_level][i][j];
 		}
 	}
+	moving_count = 0;
+}
+
+
+int main()
+{
+	init_stage();
+
+	int dx, dy;
+	int is_win;
+
+	
 	// 게임 루프
 	for (;;)
 	{
@@ -80,7 +142,7 @@ int main()
 				dx = 1;
 			}
 			// 벽 판단
-			if (stage[y + dy][x + dx] == '#')
+			if (stage[stage_level][y + dy][x + dx] == '#')
 			{
 				moving_count--;
 				dx = 0;
@@ -119,11 +181,11 @@ int main()
 				char mc[10];
 				sprintf_s(mc, sizeof(mc), "%d", moving_count);
 
-				putsxy(45, 4, "움직인횟수");
-				putsxy(45, 5, mc);
+				putsxy(45, 8, "움직인횟수");
+				putsxy(56, 8, mc);
 
 				// 점 살리기
-				if (stage[y][x] == '.')
+				if (stage[stage_level][y][x] == '.')
 				{
 					putsxy(x, y, ".");
 					back_stage[y][x] = '.';
@@ -147,6 +209,19 @@ int main()
 		if (is_win == 1)
 		{
 			putsxy(45, 20, "you are winner!");
+			stage_level++;
+			init_stage();
+		}
+
+		// 새로하기
+		if (ch == 'r' || ch == 'R')
+		{
+			init_stage();
+		}
+
+		// 종료하기
+		if (ch == 'x'|| ch == 'X')
+		{
 			break;
 		}
 	}
